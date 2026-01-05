@@ -178,6 +178,12 @@ def encode(path, wavelet_name, L, threshold_fraction, quant_bits):
         # Encode list as 16-bit words
         data_array = np.array(encoded_values, dtype=np.uint16)
         f.write(data_array.tobytes())
+
+        input_size = os.path.getsize(path)
+        output_size = os.path.getsize(output_filename)
+
+        print('origial file size,', input_size, 'new file size,', output_size )
+        print('compression ratio', input_size / output_size)
         return
 
     
@@ -328,10 +334,10 @@ def decode(path, original_path):
 
     root, _ = os.path.splitext(path.rsplit("_", 1)[0])
 
-    out_path = root + "_uncompressed.png"
+    out_path = root + "_uncompressed.tiff"
     available_out_path = name_available(out_path)
 
-    Image.fromarray(rec_u8, mode="L").save(available_out_path)
+    Image.fromarray(rec_u8, mode="L").save(available_out_path, format = 'tiff', compression = None)
     #Image.fromarray(rec_u8, mode="L").save(available_out_path, compress_level = 0) ideally want to do this so we only have our compression isntead of added lossless compression from png
     print("Saved:", available_out_path)
 
@@ -348,11 +354,11 @@ def decode(path, original_path):
 
         print(f"PSNR: {psnr(orig_u8_c, rec_u8_c, data_range=255):.3f} dB")
         print(f"SSIM: {ssim(orig_u8_c, rec_u8_c, data_range=255):.6f}")
-            #find compression ratio
+            #find compression metrics
         input_size = os.path.getsize(original_path)
         output_size = os.path.getsize(available_out_path)
-
-        print('data lost, ', input_size - output_size, ' of ', input_size)
+        print('new file size ', output_size, ' original file size ', input_size)
+        print('data lost,', input_size - output_size, 'of', input_size, ',', (input_size - output_size) / input_size * 100, '%')
     return
 
 # ---------------------------------------- terminal argparse stuff --------------------
