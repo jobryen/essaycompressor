@@ -268,7 +268,7 @@ def encode(path, wavelet_name, L, y_thresh, c_thresh, y_quant, c_quant, chromasu
 
 #undoes the RLE encoding
 
-def rle_decode(encoded: np.ndarray, sentinel: int = 0xFFFF) -> np.ndarray:
+def rle_decode(encoded, sentinel):
     out = []
     i = 0
     n = int(encoded.size)
@@ -285,7 +285,7 @@ def rle_decode(encoded: np.ndarray, sentinel: int = 0xFFFF) -> np.ndarray:
 
 #find structure of array, width height etc
 
-def infer_coeff_shapes(height: int, width: int, wavelet_name: str, L: int, mode: str = 'symmetric'):
+def infer_coeff_shapes(height, width, wavelet_name, L, mode = 'symmetric'):
     dummy = np.zeros((height, width), dtype=np.float32)
     coeffs = pywt.wavedec2(dummy, wavelet_name, level=L, mode=mode)
     shapes = [coeffs[0].shape] + [tuple(arr.shape for arr in detail) for detail in coeffs[1:]]
@@ -293,8 +293,8 @@ def infer_coeff_shapes(height: int, width: int, wavelet_name: str, L: int, mode:
 
 #rebuild tree, basically undoes the multilevel part of the multilevel DWT
 
-def build_coeff_tree_from_flat(flat_q: np.ndarray, H: int, W: int, L: int, wavelet: str,
-                                min_val: float, step: float, mode: str = 'symmetric'):
+def build_coeff_tree_from_flat(flat_q, H, W, L, wavelet,
+                                min_val, step, mode = 'symmetric'):
     shapes = infer_coeff_shapes(H, W, wavelet, L, mode=mode)
 
     def dequantise(codes_1d: np.ndarray) -> np.ndarray:
@@ -522,7 +522,7 @@ def decode(path, original_path = None):
 
 # --------------------------- terminal argparse stuff ---------------------------
 
-def build_parser() -> argparse.ArgumentParser:
+def build_parser():
     p = argparse.ArgumentParser(prog='codec')
 
     sub = p.add_subparsers(dest='cmd', required=True)
